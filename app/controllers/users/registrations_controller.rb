@@ -60,3 +60,5 @@ class Users::RegistrationsController < Devise::RegistrationsController
   #   super(resource)
   # end
 end
+# 1行目のクラス名をみると、Devise::RegistrationsControllerを継承していることが分かります。そして、コメントアウトしている箇所はすでにDevise::RegistrationsControllerで定義されているものです。
+# users/registrations_controller.rbに同名のメソッドを定義することによって、コメントアウト部分を上書きすることができます。deviseの機能を継承しているので、定義されているメソッドの中のsuperは、deviseで使用できるメソッドをそのまま実行することが出来ます。
