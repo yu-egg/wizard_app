@@ -8,6 +8,16 @@ class Users::RegistrationsController < Devise::RegistrationsController
     @user = User.new
   end
 
+  def create
+    @user = User.new(sign_up_params)
+      unless @user.valid?
+        render :new and return
+      end #まず、Userモデルのインスタンスを生成し、1ページ目から送られてきたパラメーターをインスタンス変数@userに代入します。そのインスタンス変数に対してvalid?メソッドを適用することで送られてきたパラメータが指定されたバリデーションに違反しないかどうかチェックすることができます。falseになった場合は、newアクションへrenderします。
+    session["devise.regist_data"] = {user: @user.attributes}
+    session["devise.regist_data"][:user]["password"] = params[:user][:password] #最後のページまで遷移した後に保存させる為に、sessionを用います。1ページ目で入力した情報のバリデーションチェックが完了したらsession["devise.regist_data"]に値を代入します。この時、sessionにハッシュオブジェクトの形で情報を保持させるために、attributesメソッドを用いてデータを整形しています。また、paramsの中にはパスワードの情報は含まれていますが、attributesメソッドでデータ整形をした際にパスワードの情報は含まれていません。そこで、パスワードを再度sessionに代入する必要があります。
+    @address = @user.build_address
+    render :new_address #次のページでは、このユーザーモデルに紐づく住所情報を入力させるため、該当するインスタンスを生成しておく必要があります。そのために、build_addressで今回生成したインスタンス@userに紐づくAddressモデルのインスタンスを生成します。ここで生成したAddressモデルのインスタンスは、@addressというインスタンス変数に代入します。そして、住所情報を登録させるページを表示するnew_addressアクションのビューへrenderします。
+  end
   # GET /resource/sign_up
   # def new
   #   super
