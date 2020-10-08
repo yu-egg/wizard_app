@@ -18,6 +18,24 @@ class Users::RegistrationsController < Devise::RegistrationsController
     @address = @user.build_address
     render :new_address #次のページでは、このユーザーモデルに紐づく住所情報を入力させるため、該当するインスタンスを生成しておく必要があります。そのために、build_addressで今回生成したインスタンス@userに紐づくAddressモデルのインスタンスを生成します。ここで生成したAddressモデルのインスタンスは、@addressというインスタンス変数に代入します。そして、住所情報を登録させるページを表示するnew_addressアクションのビューへrenderします。
   end
+
+  def create_address
+    @user = User.new(session["devise.regist_data"]["user"])
+    @address = Address.new(address_params)
+      unless @address.valid? #2ページ目で入力した住所情報のバリデーションチェック
+        render :new_address
+      end
+    @user.build_address(@address.attributes)
+    @user.save #バリデーションチェックが完了した情報とsessionで保持していた情報を合わせ、ユーザー情報として保存
+    session["devise.regist_data"]["user"].clear #sessionを削除する,clearメソッドを用いて明示的にsessionを削除します。
+    sign_in(:user, @user) #ログインをする
+  end
+
+  private
+
+  def address_params
+    params.require(:address).permit(:postal_code, :address)
+  end
   # GET /resource/sign_up
   # def new
   #   super
